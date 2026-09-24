@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { verifyToken } from '../lib/auth.js';
-import { commitFiles } from '../lib/github.js';
+import { saveContent, saveImage } from '../lib/content.js';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_IMAGES_PER_SAVE = 20;
@@ -32,16 +32,12 @@ router.post('/', async (req, res) => {
     }
   }
 
-  const files = images.map((img) => ({ path: 'frontend/public/' + img.path, content: img.base64, encoding: 'base64' }));
-  files.push({
-    path: 'frontend/src/data/siteContent.json',
-    content: JSON.stringify(content, null, 2) + '\n',
-    encoding: 'utf-8',
-  });
-
   try {
-    const commitSha = await commitFiles(files, 'Admin panel update via /admin');
-    return res.status(200).json({ ok: true, commitSha });
+    for (const img of images) {
+      await saveImage(img.path, Buffer.from(img.base64, 'base64'), img.contentType || 'application/octet-stream');
+    }
+    await saveContent(content);
+    return res.status(200).json({ ok: true });
   } catch (e) {
     return res.status(502).json({ error: String(e.message || e) });
   }

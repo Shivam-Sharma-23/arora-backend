@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import adminLoginRoute from './routes/adminLogin.js';
 import saveContentRoute from './routes/saveContent.js';
+import contentRoute from './routes/content.js';
+import uploadsRoute from './routes/uploads.js';
 
 const DEV_ORIGINS = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:8888'];
 
@@ -35,6 +37,8 @@ app.get('/health', (req, res) => res.status(200).json({ ok: true }));
 
 app.use('/admin-login', adminLoginRoute);
 app.use('/save-content', saveContentRoute);
+app.use('/content', contentRoute);
+app.use('/uploads', uploadsRoute);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found.' });
